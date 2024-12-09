@@ -1,14 +1,14 @@
 {
-  rewrites: [
+  "rewrites": [
     {
-      source: /:path*,
-      has: [
+      "source": "/:path*",
+      "has": [
         {
-          type: host,
-          value: cal.tesereft.com
+          "type": "host",
+          "value": "cal.tesereft.com"
         }
       ],
-      destination: /a/:path*
+      "destination": "/a/:path*"
     }
   ]
 }
