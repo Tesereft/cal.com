@@ -5,7 +5,7 @@
       "has": [
         {
           "type": "host",
-          "value": "cal.tesereft.com"
+          "value": "https://cal.tesereft.com"
         }
       ],
       "destination": "/:path*"
