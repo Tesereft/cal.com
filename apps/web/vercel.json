@@ -8,7 +8,7 @@
           "value": "cal.tesereft.com"
         }
       ],
-      "destination": "/a/:path*"
+      "destination": "/:path*"
     }
   ]
 }
