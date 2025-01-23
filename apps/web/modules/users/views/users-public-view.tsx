@@ -18,10 +18,11 @@ import { useRouterQuery } from "@calcom/lib/hooks/useRouterQuery";
 import useTheme from "@calcom/lib/hooks/useTheme";
 import { HeadSeo, Icon, UnpublishedEntity, UserAvatar } from "@calcom/ui";
 
-import { type getServerSideProps } from "./users-public-view.getServerSideProps";
+import type { getServerSideProps } from "@server/lib/[user]/getServerSideProps";
 
-export function UserPage(props: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const { users, profile, eventTypes, markdownStrippedBio, entity } = props;
+export type PageProps = InferGetServerSidePropsType<typeof getServerSideProps>;
+export function UserPage(props: PageProps) {
+  const { users, profile, eventTypes, markdownStrippedBio, entity, isOrgSEOIndexable } = props;
 
   const [user] = users; //To be used when we only have a single user, not dynamic group
   useTheme(profile.theme);
@@ -58,6 +59,13 @@ export function UserPage(props: InferGetServerSidePropsType<typeof getServerSide
 
   const isEventListEmpty = eventTypes.length === 0;
   const isOrg = !!user?.profile?.organization;
+
+  const allowSEOIndexing = isOrg
+    ? isOrgSEOIndexable
+      ? profile.allowSEOIndexing
+      : false
+    : profile.allowSEOIndexing;
+
   return (
     <>
       <HeadSeo
@@ -70,8 +78,8 @@ export function UserPage(props: InferGetServerSidePropsType<typeof getServerSide
           users: [{ username: `${user.username}`, name: `${user.name}` }],
         }}
         nextSeoProps={{
-          noindex: !profile.allowSEOIndexing,
-          nofollow: !profile.allowSEOIndexing,
+          noindex: !allowSEOIndexing,
+          nofollow: !allowSEOIndexing,
         }}
       />
 
@@ -111,6 +119,7 @@ export function UserPage(props: InferGetServerSidePropsType<typeof getServerSide
               <>
                 <div
                   className="  text-subtle break-words text-sm [&_a]:text-blue-500 [&_a]:underline [&_a]:hover:text-blue-600"
+                  // eslint-disable-next-line react/no-danger
                   dangerouslySetInnerHTML={{ __html: props.safeBio }}
                 />
               </>
@@ -121,36 +130,34 @@ export function UserPage(props: InferGetServerSidePropsType<typeof getServerSide
             className={classNames("rounded-md ", !isEventListEmpty && "border-subtle border")}
             data-testid="event-types">
             {eventTypes.map((type) => (
-              <div
+              <Link
                 key={type.id}
                 style={{ display: "flex", ...eventTypeListItemEmbedStyles }}
-                className="bg-default border-subtle dark:bg-muted dark:hover:bg-emphasis hover:bg-muted group relative border-b transition first:rounded-t-md last:rounded-b-md last:border-b-0">
+                prefetch={false}
+                href={{
+                  pathname: `/${user.profile.username}/${type.slug}`,
+                  query,
+                }}
+                passHref
+                onClick={async () => {
+                  sdkActionManager?.fire("eventTypeSelected", {
+                    eventType: type,
+                  });
+                }}
+                className="bg-default border-subtle dark:bg-muted dark:hover:bg-emphasis hover:bg-muted group relative border-b transition first:rounded-t-md last:rounded-b-md last:border-b-0"
+                data-testid="event-type-link">
                 <Icon
                   name="arrow-right"
                   className="text-emphasis absolute right-4 top-4 h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100"
                 />
                 {/* Don't prefetch till the time we drop the amount of javascript in [user][type] page which is impacting score for [user] page */}
                 <div className="block w-full p-5">
-                  <Link
-                    prefetch={false}
-                    href={{
-                      pathname: `/${user.profile.username}/${type.slug}`,
-                      query,
-                    }}
-                    passHref
-                    onClick={async () => {
-                      sdkActionManager?.fire("eventTypeSelected", {
-                        eventType: type,
-                      });
-                    }}
-                    data-testid="event-type-link">
-                    <div className="flex flex-wrap items-center">
-                      <h2 className="text-default pr-2 text-sm font-semibold">{type.title}</h2>
-                    </div>
-                    <EventTypeDescription eventType={type} isPublic={true} shortenDescription />
-                  </Link>
+                  <div className="flex flex-wrap items-center">
+                    <h2 className="text-default pr-2 text-sm font-semibold">{type.title}</h2>
+                  </div>
+                  <EventTypeDescription eventType={type} isPublic={true} shortenDescription />
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
 
@@ -161,5 +168,5 @@ export function UserPage(props: InferGetServerSidePropsType<typeof getServerSide
     </>
   );
 }
-
+UserPage.isBookingPage = true;
 export default UserPage;
