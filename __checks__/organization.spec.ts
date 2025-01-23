@@ -11,15 +11,15 @@ test.describe("Org", () => {
       await expectPageToBeRenderedWithEmbedSsr(page);
     });
 
-    test("Org User(Peer) Page should be embeddable", async ({ page }) => {
-      const response = await page.goto("https://i.cal.com/peer/embed");
+    test("Org User(Rick) Page should be embeddable", async ({ page }) => {
+      const response = await page.goto("https://i.cal.com/team-rick/embed");
       expect(response?.status()).toBe(200);
-      await expect(page.locator("text=Peer Richelsen")).toBeVisible();
+      await expect(page.locator("text=Rick in i.cal.com")).toBeVisible();
       await expectPageToBeRenderedWithEmbedSsr(page);
     });
 
-    test("Org User Event(peer/meet) Page should be embeddable", async ({ page }) => {
-      const response = await page.goto("https://i.cal.com/peer/meet/embed");
+    test("Org User Event(/team-rick/test-event) Page should be embeddable", async ({ page }) => {
+      const response = await page.goto("https://i.cal.com/team-rick/test-event/embed");
       expect(response?.status()).toBe(200);
       await expect(page.locator('[data-testid="decrementMonth"]')).toBeVisible();
       await expect(page.locator('[data-testid="incrementMonth"]')).toBeVisible();
@@ -75,7 +75,8 @@ test.describe("Org", () => {
 
   test.describe("Browse the Engineering Team", async () => {
     test("By User Navigation", async ({ page }) => {
-      await page.goto("https://i.cal.com");
+      const response = await page.goto("https://i.cal.com");
+      expect(response?.status()).toBe(200);
       await page.click('text="Engineering"');
       await expect(page.locator("text=Cal.com Engineering")).toBeVisible();
     });

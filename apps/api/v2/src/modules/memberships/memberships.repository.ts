@@ -33,6 +33,16 @@ export class MembershipsRepository {
     return membership;
   }
 
+  async findUserMemberships(userId: number) {
+    const memberships = await this.dbRead.prisma.membership.findMany({
+      where: {
+        userId,
+      },
+    });
+
+    return memberships;
+  }
+
   async findMembershipByOrgId(orgId: number, userId: number) {
     return this.findMembershipByTeamId(orgId, userId);
   }
@@ -50,12 +60,13 @@ export class MembershipsRepository {
     return !!adminMembership;
   }
 
-  async createMembership(teamId: number, userId: number, role: MembershipRole) {
+  async createMembership(teamId: number, userId: number, role: MembershipRole, accepted: boolean) {
     const membership = await this.dbRead.prisma.membership.create({
       data: {
         role,
         teamId,
         userId,
+        accepted,
       },
     });
 
