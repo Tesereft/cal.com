@@ -7,7 +7,7 @@
   <h3 align="center">Cal.com</h3>
 
   <p align="center">
-    The open-source Calendly successor.
+    The open-source Calendly successor. Yeah!
     <br />
     <a href="https://cal.com"><strong>Learn more »</strong></a>
     <br />
